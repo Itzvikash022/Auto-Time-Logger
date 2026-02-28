@@ -138,7 +138,7 @@ export async function logActivity(context: vscode.ExtensionContext): Promise<voi
                 title: 'Auto Time Logger: Generating AI summary…',
                 cancellable: false,
             },
-            () => summarizeCode(apiKey, codeSnippet)
+            () => summarizeCode(apiKey, codeSnippet, description)
         );
     } catch {
         // summarizeCode is already resilient; this is a safety net

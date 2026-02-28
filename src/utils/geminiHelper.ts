@@ -42,12 +42,16 @@ async function generateContentWithFallback(apiKey: string, prompt: string, model
  * Calls Gemini to produce a brief natural-language summary of the given code snippet.
  * Returns an empty string on failure rather than throwing, so log saves still succeed.
  */
-export async function summarizeCode(apiKey: string, codeSnippet: string): Promise<string> {
+export async function summarizeCode(apiKey: string, codeSnippet: string, taskDescription?: string): Promise<string> {
     if (!codeSnippet.trim()) {
         return '(no code context available)';
     }
 
-    const prompt = `You are a developer assistant. Summarize the following code snippet in 1-2 concise sentences, focusing on what it does and any notable patterns. Do not include code in your reply.
+    const contextInstruction = taskDescription
+        ? `The user is currently executing the following task: "${taskDescription}". Summarize how this code snippet relates to or facilitates this task in 1-2 concise sentences. If the code seems unrelated to the task, just summarize what the code does.`
+        : `Summarize the following code snippet in 1-2 concise sentences, focusing on what it does and any notable patterns.`;
+
+    const prompt = `You are a developer assistant. ${contextInstruction} Do not include code in your reply.
 
 \`\`\`
 ${codeSnippet}

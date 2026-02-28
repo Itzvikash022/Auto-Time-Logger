@@ -225,8 +225,12 @@ export async function captureAIPromptAndLog(context: vscode.ExtensionContext): P
         return;
     }
 
-    // 7. Generate AI summary (same flow as manual Log Activity)
+    // 7. Generate AI summary
+    // [USER REMINDER]: AI summary is disabled in this mode.
+    // We intentionally skip summarizing the code context during 'Capture AI Prompt' 
+    // because the prompt itself is usually sufficient context.
     let summary = '(AI summary unavailable)';
+    /* 
     try {
         summary = await vscode.window.withProgress(
             {
@@ -234,11 +238,12 @@ export async function captureAIPromptAndLog(context: vscode.ExtensionContext): P
                 title: 'Auto Time Logger: Generating AI summary…',
                 cancellable: false,
             },
-            () => summarizeCode(apiKey, codeSnippet)
+            () => summarizeCode(apiKey, codeSnippet, aiPrompt)
         );
     } catch {
-        /* summarizeCode is resilient — fall through with default */
+        // summarizeCode is resilient — fall through with default
     }
+    */
 
     // 8. Build and persist entry
     const entry: LogEntry = {
