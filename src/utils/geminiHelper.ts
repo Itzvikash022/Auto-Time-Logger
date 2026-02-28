@@ -1,15 +1,41 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { LogEntry } from '../types/logEntry';
 import { Timesheet } from '../types/timesheet';
-
-const MODEL_NAME = 'gemini-2.0-flash-preview';
+const FALLBACK_MODELS = [
+    'gemini-3-flash-preview',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash'
+];
 
 /**
- * Initializes and returns a Gemini GenerativeModel instance.
+ * Initializes and returns a Gemini GenerativeModel instance for a specific model.
  */
-function getModel(apiKey: string) {
+function getModel(apiKey: string, modelName: string) {
     const genAI = new GoogleGenerativeAI(apiKey);
-    return genAI.getGenerativeModel({ model: MODEL_NAME });
+    return genAI.getGenerativeModel({ model: modelName });
+}
+
+/**
+ * Attempts to generate content using a primary model, falling back to alternates on failure.
+ */
+async function generateContentWithFallback(apiKey: string, prompt: string, models: string[]): Promise<string> {
+    let lastError: any;
+
+    for (const modelName of models) {
+        try {
+            const model = getModel(apiKey, modelName);
+            const result = await model.generateContent(prompt);
+            return result.response.text().trim();
+        } catch (err: any) {
+            console.warn(`[AutoTimeLogger] Model ${modelName} failed: ${err.message || err}. Trying next fallback...`);
+            lastError = err;
+            // Only retry on typical network/demand failures (503s/500s/rate limits). 
+            // If it's a hard auth failure (403), we could theoretically bail early, 
+            // but trying the next model is safer for broad resilience.
+        }
+    }
+
+    throw lastError || new Error('All fallback models failed.');
 }
 
 /**
@@ -28,9 +54,7 @@ ${codeSnippet}
 \`\`\``;
 
     try {
-        const model = getModel(apiKey);
-        const result = await model.generateContent(prompt);
-        return result.response.text().trim();
+        return await generateContentWithFallback(apiKey, prompt, FALLBACK_MODELS);
     } catch (err) {
         console.error('[AutoTimeLogger] summarizeCode error:', err);
         return '(AI summary unavailable)';
@@ -73,9 +97,7 @@ Log entries:
 ${logsText}`;
 
     try {
-        const model = getModel(apiKey);
-        const result = await model.generateContent(prompt);
-        let text = result.response.text().trim();
+        let text = await generateContentWithFallback(apiKey, prompt, FALLBACK_MODELS);
 
         // Strip potential markdown fences if Gemini wraps the JSON
         text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();

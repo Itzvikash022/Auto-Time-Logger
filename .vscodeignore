@@ -7,7 +7,6 @@ tsconfig.json
 **/*.map
 **/*.ts
 !out/**
-node_modules/**
 architecture.md
 HOW_TO_USE.md
 *.vsix

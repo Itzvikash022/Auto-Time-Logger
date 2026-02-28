@@ -76,9 +76,18 @@ function getCodeSnippet(editor: vscode.TextEditor): string {
  * Reads the OS clipboard and returns its text content.
  * Returns undefined if the clipboard is empty.
  */
-async function captureFromClipboard(): Promise<string | undefined> {
-    const text = await vscode.env.clipboard.readText();
-    return text.trim() || undefined;
+async function captureFromClipboard(retries = 3): Promise<string | undefined> {
+    let text = await vscode.env.clipboard.readText();
+    text = text.trim();
+
+    // If empty and we have retries, wait 100ms and try again. 
+    // This helps when the OS clipboard buffer is slightly delayed.
+    if (!text && retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return captureFromClipboard(retries - 1);
+    }
+
+    return text || undefined;
 }
 
 /**
@@ -87,9 +96,12 @@ async function captureFromClipboard(): Promise<string | undefined> {
  */
 async function captureFromActiveInput(editor: vscode.TextEditor | undefined): Promise<string | undefined> {
     if (editor && !editor.selection.isEmpty) {
-        return editor.document.getText(editor.selection).trim() || undefined;
+        const selectedText = editor.document.getText(editor.selection).trim();
+        if (selectedText.length > 0) {
+            return selectedText;
+        }
     }
-    // fallback to clipboard
+    // fallback to clipboard if no selection or selection was just whitespace
     return captureFromClipboard();
 }
 
@@ -122,9 +134,11 @@ async function resolvePrompt(
                 );
                 return undefined;
             }
-            // If there was a selection we used it; if we fell back to clipboard mark accordingly
-            const source: LogSource =
-                editor && !editor.selection.isEmpty ? 'activeInputCapture' : 'clipboard';
+            // Since we updated captureFromActiveInput to ensure we strictly use non-empty trimmed text,
+            // we can check if the editor actually had a valid selection.
+            const hasSelectionText = editor && !editor.selection.isEmpty && editor.document.getText(editor.selection).trim().length > 0;
+            const source: LogSource = hasSelectionText ? 'activeInputCapture' : 'clipboard';
+
             return { text, source };
         }
 
