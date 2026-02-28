@@ -2,7 +2,7 @@
     "name": "auto-time-logger",
     "displayName": "Auto Time Logger",
     "description": "Manually log development tasks and auto-generate a timesheet powered by Google Gemini AI.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "publisher": "auto-time-logger",
     "engines": {
         "vscode": "^1.80.0"
