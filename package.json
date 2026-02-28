@@ -1,0 +1,79 @@
+{
+    "name": "auto-time-logger",
+    "displayName": "Auto Time Logger",
+    "description": "Manually log development tasks and auto-generate a timesheet powered by Google Gemini AI.",
+    "version": "0.1.0",
+    "publisher": "auto-time-logger",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/auto-time-logger/auto-time-logger.git"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.logActivity",
+                "title": "Auto Time Logger: Log Activity"
+            },
+            {
+                "command": "extension.generateTimesheet",
+                "title": "Auto Time Logger: Generate Timesheet"
+            },
+            {
+                "command": "extension.setGeminiApiKey",
+                "title": "Auto Time Logger: Set Gemini API Key"
+            },
+            {
+                "command": "extension.captureAIPromptAndLog",
+                "title": "Auto Time Logger: Capture AI Prompt and Log"
+            }
+        ],
+        "configuration": {
+            "title": "Auto Time Logger",
+            "properties": {
+                "taskLogger.logsPath": {
+                    "type": "string",
+                    "default": ".project-logs/",
+                    "description": "Relative path (from workspace root) where log and timesheet JSON files are stored."
+                },
+                "autoTimeLogger.promptCaptureMode": {
+                    "type": "string",
+                    "enum": [
+                        "manual",
+                        "clipboard",
+                        "activeInputCapture"
+                    ],
+                    "enumDescriptions": [
+                        "Classic manual mode: user types the description in an input box (original Log Activity behavior).",
+                        "Clipboard mode: reads the current OS clipboard content as the AI prompt — no input box shown.",
+                        "Active Input Capture: uses the current editor selection as the AI prompt, falling back to clipboard."
+                    ],
+                    "default": "clipboard",
+                    "description": "Controls how the 'Capture AI Prompt and Log' command obtains the task description."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package",
+        "vscode:prepublish": "npm run compile",
+        "prepublishOnly": "npm run compile"
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.21.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/vscode": "^1.80.0",
+        "typescript": "^5.4.0"
+    }
+}
