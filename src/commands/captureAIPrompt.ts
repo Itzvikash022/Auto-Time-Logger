@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { LogEntry, LogSource } from '../types/logEntry';
-import { appendLogEntry, hashSnippet, isDuplicateEntry } from '../utils/fsHelper';
+import { appendLogEntry, hashSnippet, isDuplicateEntry, getISTTimestamp } from '../utils/fsHelper';
 import { summarizeCode } from '../utils/geminiHelper';
 
 const SECRET_KEY = 'geminiApiKey';
@@ -176,7 +176,7 @@ export async function captureAIPromptAndLog(context: vscode.ExtensionContext): P
             .get<PromptCaptureMode>('promptCaptureMode') ?? 'clipboard';
 
     const editor = vscode.window.activeTextEditor;
-    const timestamp = new Date().toISOString();
+    const timestamp = getISTTimestamp();
     const dateStr = timestamp.slice(0, 10);
 
     // 2. Resolve log file path

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { LogEntry } from '../types/logEntry';
-import { appendLogEntry, hashSnippet } from '../utils/fsHelper';
+import { appendLogEntry, hashSnippet, getISTTimestamp } from '../utils/fsHelper';
 import { summarizeCode } from '../utils/geminiHelper';
 
 const SECRET_KEY = 'geminiApiKey';
@@ -105,7 +105,7 @@ export async function logActivity(context: vscode.ExtensionContext): Promise<voi
 
     // 2. Gather context from active editor
     const editor = vscode.window.activeTextEditor;
-    const timestamp = new Date().toISOString();
+    const timestamp = getISTTimestamp();
     let file = '';
     let method = '';
     let codeSnippet = '';

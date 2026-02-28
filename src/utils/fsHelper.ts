@@ -96,3 +96,21 @@ export function isDuplicateEntry(filePath: string, aiPrompt: string): boolean {
     const TWO_MINUTES_MS = 2 * 60 * 1000;
     return now - lastTime < TWO_MINUTES_MS;
 }
+
+/**
+ * Returns the current local time in IST (UTC+05:30) as an ISO-8601 formatted string.
+ * Example: "2026-03-01T00:34:15.000+05:30"
+ * This ensures that logs and files are created based on the user's local date,
+ * not the backend server's UTC date.
+ */
+export function getISTTimestamp(): string {
+    const now = new Date();
+    // IST is UTC + 5.5 hours
+    const istOffsetMs = 5.5 * 60 * 60 * 1000;
+    const istTime = new Date(now.getTime() + istOffsetMs);
+
+    // Convert to ISO string, which will assume it's UTC internally 
+    // and append 'Z'. We replace 'Z' with our explicit offset.
+    const isoString = istTime.toISOString();
+    return isoString.replace('Z', '+05:30');
+}

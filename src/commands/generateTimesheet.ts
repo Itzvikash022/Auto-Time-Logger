@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { readLogFile, writeTimesheetFile, fileExists } from '../utils/fsHelper';
+import { readLogFile, writeTimesheetFile, fileExists, getISTTimestamp } from '../utils/fsHelper';
 import { generateTimesheetFromLogs } from '../utils/geminiHelper';
 
 const SECRET_KEY = 'geminiApiKey';
@@ -47,7 +47,7 @@ function resolveDayFilePath(dateStr: string, suffix: 'logs' | 'timesheet'): stri
  */
 export async function generateTimesheet(context: vscode.ExtensionContext): Promise<void> {
     // 1. Resolve today's log file
-    const dateStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const dateStr = getISTTimestamp().slice(0, 10); // YYYY-MM-DD
     const logFilePath = resolveDayFilePath(dateStr, 'logs');
 
     if (!logFilePath) {
